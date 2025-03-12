@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competencias y Entregables</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Opcional: Si deseas usar un ícono específico, puedes incluir Font Awesome:
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
+</head>
+<body>
+  <div class="container">
+    <h1>Competencias y Entregables</h1>
+
+    <label for="competencia-select">Selecciona una competencia:</label>
+    <select id="competencia-select">
+      {% for comp in competencias %}
+        <option value="{{ comp }}">{{ comp }}</option>
+      {% endfor %}
+    </select>
+
+    <h3>Entregables:</h3>
+    <ul id="deliverables-list"></ul>
+  </div>
+
+  <script>
+    // Datos de entregables inyectados desde el servidor
+    var deliverablesData = {{ entregables|tojson }};
+    var selectElement = document.getElementById('competencia-select');
+    var listElement = document.getElementById('deliverables-list');
+
+    // Función para copiar texto al portapapeles
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(function() {
+        alert('Texto copiado al portapapeles: ' + text);
+      }, function(err) {
+        console.error('Error al copiar: ', err);
+      });
+    }
+
+    // Función para actualizar la lista de entregables según la competencia seleccionada
+    function updateDeliverables() {
+      var selectedComp = selectElement.value;
+      listElement.innerHTML = ''; // Limpiar lista actual
+
+      if (deliverablesData[selectedComp]) {
+        deliverablesData[selectedComp].forEach(function(entregable) {
+          // Crear el elemento <li>
+          var li = document.createElement('li');
+
+          // Texto del entregable
+          var textSpan = document.createElement('span');
+          textSpan.textContent = entregable;
+
+          // Botón / ícono para copiar
+          var copyBtn = document.createElement('button');
+          copyBtn.textContent = "📋";  // También podrías usar: copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+          copyBtn.title = "Copiar entregable";
+          copyBtn.style.marginLeft = "10px"; // Ajuste de estilo
+          copyBtn.onclick = function() {
+            copyToClipboard(entregable);
+          };
+
+          // Agregar texto y botón al <li>
+          li.appendChild(textSpan);
+          li.appendChild(copyBtn);
+
+          // Agregar <li> al <ul>
+          listElement.appendChild(li);
+        });
+      }
+    }
+
+    // Evento para cambio de competencia
+    selectElement.addEventListener('change', updateDeliverables);
+
+    // Carga inicial de entregables
+    updateDeliverables();
+  </script>
+</body>
+</html>
